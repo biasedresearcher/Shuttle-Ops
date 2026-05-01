@@ -1,0 +1,200 @@
+/* ── Reset & Base ──────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --green:   #1a7a4a;
+  --green-l: #25a368;
+  --green-bg:#e8f5ef;
+  --gold:    #f5a623;
+  --silver:  #9ea7b0;
+  --bronze:  #cd7f32;
+  --text:    #1e2328;
+  --muted:   #6b7280;
+  --border:  #d1d5db;
+  --surface: #ffffff;
+  --radius:  12px;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--green-bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ────────────────────────────────────────────── */
+header {
+  background: var(--green);
+  color: #fff;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+.header-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  max-width: 780px;
+  margin: 0 auto;
+}
+.logo { font-size: 2.5rem; line-height: 1; }
+h1    { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.5px; }
+.tagline { font-size: 0.85rem; opacity: 0.82; margin-top: 2px; }
+
+/* ── Main ──────────────────────────────────────────────── */
+main {
+  flex: 1;
+  max-width: 780px;
+  width: 100%;
+  margin: 1.75rem auto;
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* ── Card ──────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 1.5rem 1.75rem;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+}
+.card h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--green);
+}
+
+/* ── Record form ───────────────────────────────────────── */
+.input-row {
+  display: flex;
+  gap: 0.6rem;
+}
+.input-row input {
+  flex: 1;
+  padding: 0.65rem 1rem;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.input-row input:focus {
+  border-color: var(--green-l);
+  box-shadow: 0 0 0 3px rgba(37,163,104,0.18);
+}
+.input-row button {
+  padding: 0.65rem 1.25rem;
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  white-space: nowrap;
+}
+.input-row button:hover  { background: var(--green-l); }
+.input-row button:active { transform: scale(0.97); }
+
+.form-message {
+  margin-top: 0.55rem;
+  font-size: 0.88rem;
+  min-height: 1.2em;
+}
+.form-message.success { color: var(--green); }
+.form-message.error   { color: #dc2626; }
+
+/* ── Leaderboard table ─────────────────────────────────── */
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.leaderboard-table th {
+  text-align: left;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1.5px solid var(--border);
+}
+.leaderboard-table td {
+  padding: 0.6rem 0.5rem;
+  border-bottom: 1px solid #f0f2f4;
+  font-size: 0.98rem;
+}
+.leaderboard-table tr:last-child td { border-bottom: none; }
+
+.rank-cell { width: 2.5rem; text-align: center; font-size: 1.2rem; }
+.wins-cell { text-align: right; font-weight: 700; color: var(--green); width: 4rem; }
+.wins-bar-cell { width: 40%; padding-left: 0.75rem; }
+
+.wins-bar-bg {
+  background: #e5e7eb;
+  border-radius: 999px;
+  height: 8px;
+  overflow: hidden;
+}
+.wins-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--green-l);
+  transition: width 0.4s ease;
+}
+
+/* ── History ───────────────────────────────────────────── */
+.history-wrap { max-height: 380px; overflow-y: auto; }
+.history-date-group { margin-bottom: 1.1rem; }
+.history-date-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+}
+.history-rows { display: flex; flex-direction: column; gap: 4px; }
+.history-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.35rem 0.6rem;
+  background: var(--green-bg);
+  border-radius: 6px;
+  font-size: 0.93rem;
+}
+.history-wins {
+  font-weight: 700;
+  color: var(--green);
+  background: #fff;
+  border-radius: 999px;
+  padding: 1px 10px;
+  font-size: 0.85rem;
+}
+
+/* ── Empty message ─────────────────────────────────────── */
+.empty-msg {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-style: italic;
+  padding: 0.5rem 0;
+}
+
+/* ── Footer ────────────────────────────────────────────── */
+footer {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* ── Responsive ────────────────────────────────────────── */
+@media (max-width: 520px) {
+  .card { padding: 1.1rem 1rem; }
+  .wins-bar-cell { display: none; }
+}

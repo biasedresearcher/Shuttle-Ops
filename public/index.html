@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🏸 Shuttle-Ops — Daily Badminton Scores</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <span class="logo">🏸</span>
+      <div>
+        <h1>Shuttle-Ops</h1>
+        <p class="tagline">Daily Badminton Score Tracker</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Record a win -->
+    <section class="card record-card">
+      <h2>🥇 Record a Win</h2>
+      <form id="win-form">
+        <div class="input-row">
+          <input
+            type="text"
+            id="player-input"
+            name="player"
+            placeholder="Enter player name…"
+            maxlength="50"
+            autocomplete="off"
+            required
+          />
+          <button type="submit">+ Add Win</button>
+        </div>
+        <p id="form-message" class="form-message" role="alert" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <!-- Today's leaderboard -->
+    <section class="card">
+      <h2 id="daily-heading">📅 Today's Leaderboard</h2>
+      <div id="daily-leaderboard" class="leaderboard-wrap">
+        <p class="empty-msg">No wins recorded yet today. Be the first!</p>
+      </div>
+    </section>
+
+    <!-- All-time leaderboard -->
+    <section class="card">
+      <h2>🏆 All-Time Leaderboard</h2>
+      <div id="overall-leaderboard" class="leaderboard-wrap">
+        <p class="empty-msg">No data yet.</p>
+      </div>
+    </section>
+
+    <!-- History (past dates) -->
+    <section class="card">
+      <h2>📖 Score History</h2>
+      <div id="history-panel" class="history-wrap">
+        <p class="empty-msg">No history yet.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Shuttle-Ops &copy; <span id="year"></span></p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
