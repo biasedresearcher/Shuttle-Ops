@@ -161,8 +161,10 @@ function extractTeams(match) {
 function computeStats(matches, player, opponent, formCount) {
   const statsByPlayer = new Map();
   const today = new Date();
-  const cutoff30 = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - DAYS_ACTIVE_WINDOW));
-  const cutoff7 = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - DAYS_WEEK));
+  const cutoff30 = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+  cutoff30.setUTCDate(cutoff30.getUTCDate() - DAYS_ACTIVE_WINDOW);
+  const cutoff7 = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+  cutoff7.setUTCDate(cutoff7.getUTCDate() - DAYS_WEEK);
 
   matches.forEach(match => {
     const teams = extractTeams(match);
@@ -210,10 +212,10 @@ function computeStats(matches, player, opponent, formCount) {
         entry.matchesLast7 += 1;
         if (win) entry.winsLast7 += 1;
       }
-      const monthKey = `${matchDate.getUTCFullYear()}-${matchDate.getUTCMonth() + 1}`;
-      const currentMonthKey = `${today.getUTCFullYear()}-${today.getUTCMonth() + 1}`;
+      const monthKey = formatMonthKey(matchDate);
+      const currentMonthKey = formatMonthKey(today);
       const prevMonth = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - 1, 1));
-      const prevMonthKey = `${prevMonth.getUTCFullYear()}-${prevMonth.getUTCMonth() + 1}`;
+      const prevMonthKey = formatMonthKey(prevMonth);
       if (monthKey === currentMonthKey) {
         entry.monthMatches += 1;
         if (win) entry.monthWins += 1;
@@ -250,6 +252,10 @@ function computeStats(matches, player, opponent, formCount) {
     },
     badges
   };
+}
+
+function formatMonthKey(date) {
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
 }
 
 function buildPlayerStats(entry, formCount) {

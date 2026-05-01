@@ -109,7 +109,8 @@ function getAllMatches() {
 function listPlayers() {
   return getDb()
     .prepare(`
-      SELECT player FROM (
+      SELECT MIN(player) AS player
+      FROM (
         SELECT team_a1 AS player FROM matches
         UNION
         SELECT team_a2 AS player FROM matches WHERE team_a2 IS NOT NULL
@@ -119,6 +120,7 @@ function listPlayers() {
         SELECT team_b2 AS player FROM matches WHERE team_b2 IS NOT NULL
       )
       WHERE player IS NOT NULL
+      GROUP BY LOWER(player)
       ORDER BY player COLLATE NOCASE
     `)
     .all()
@@ -144,12 +146,12 @@ function getLeaderboard(startDate, endDate) {
         UNION ALL
         SELECT match_date, winner_team, 'B' AS team, team_b2 AS player FROM matches WHERE team_b2 IS NOT NULL
       )
-      SELECT player,
+      SELECT MIN(player) AS player,
              SUM(CASE WHEN team = winner_team THEN 1 ELSE 0 END) AS wins,
              COUNT(*) AS matches
       FROM participants
       ${dateClause}
-      GROUP BY player COLLATE NOCASE
+      GROUP BY LOWER(player)
       ORDER BY wins DESC, player ASC
     `)
     .all(...params);

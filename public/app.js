@@ -196,7 +196,7 @@ async function loadPlayers() {
 
 async function loadStats() {
   const player = focusPlayer.value;
-  const opponent = headB.value && headB.value !== player ? headB.value : '';
+  const headToHeadOpponent = headB.value && headB.value !== player ? headB.value : '';
   if (!player) {
     statWinPct.textContent = '—';
     statMatches.textContent = '—';
@@ -211,7 +211,7 @@ async function loadStats() {
     return;
   }
 
-  const data = await fetchJson(`/api/stats?player=${encodeURIComponent(player)}&opponent=${encodeURIComponent(opponent)}&form=${formLength.value}`);
+  const data = await fetchJson(`/api/stats?player=${encodeURIComponent(player)}&opponent=${encodeURIComponent(headToHeadOpponent)}&form=${formLength.value}`);
   if (data.player) {
     statWinPct.textContent = `${data.player.winPct}%`;
     statMatches.textContent = data.player.matches;
