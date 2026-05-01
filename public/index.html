@@ -18,48 +18,146 @@
   </header>
 
   <main>
-    <!-- Record a win -->
+    <!-- Record a match -->
     <section class="card record-card">
-      <h2>🥇 Record a Win</h2>
-      <form id="win-form">
-        <div class="input-row">
-          <input
-            type="text"
-            id="player-input"
-            name="player"
-            placeholder="Enter player name…"
-            maxlength="50"
-            autocomplete="off"
-            required
-          />
-          <button type="submit">+ Add Win</button>
+      <h2>🏸 Record a Match</h2>
+      <form id="match-form">
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="match-type">Match type</label>
+            <select id="match-type">
+              <option value="singles">Singles</option>
+              <option value="doubles">Doubles</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="winner-team">Winning team</label>
+            <select id="winner-team">
+              <option value="A">Team A</option>
+              <option value="B">Team B</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="teams-grid">
+          <div class="team-card">
+            <h3>Team A</h3>
+            <input type="text" id="team-a1" placeholder="Player A1" maxlength="50" autocomplete="off" required />
+            <input type="text" id="team-a2" placeholder="Player A2 (doubles)" maxlength="50" autocomplete="off" />
+          </div>
+          <div class="team-card">
+            <h3>Team B</h3>
+            <input type="text" id="team-b1" placeholder="Player B1" maxlength="50" autocomplete="off" required />
+            <input type="text" id="team-b2" placeholder="Player B2 (doubles)" maxlength="50" autocomplete="off" />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" id="submit-button">+ Record Match</button>
+          <button type="button" class="ghost" id="cancel-edit" hidden>Cancel edit</button>
+          <button type="button" class="ghost" id="undo-button">Undo last entry</button>
         </div>
         <p id="form-message" class="form-message" role="alert" aria-live="polite"></p>
       </form>
     </section>
 
-    <!-- Today's leaderboard -->
+    <!-- Leaderboards -->
     <section class="card">
-      <h2 id="daily-heading">📅 Today's Leaderboard</h2>
-      <div id="daily-leaderboard" class="leaderboard-wrap">
-        <p class="empty-msg">No wins recorded yet today. Be the first!</p>
+      <h2>📊 Leaderboards</h2>
+      <div class="leaderboard-grid">
+        <div class="leaderboard-card">
+          <h3 id="daily-heading">Daily</h3>
+          <div id="daily-leaderboard" class="leaderboard-wrap"></div>
+        </div>
+        <div class="leaderboard-card">
+          <h3>Weekly</h3>
+          <div id="weekly-leaderboard" class="leaderboard-wrap"></div>
+        </div>
+        <div class="leaderboard-card">
+          <h3>Monthly</h3>
+          <div id="monthly-leaderboard" class="leaderboard-wrap"></div>
+        </div>
       </div>
     </section>
 
-    <!-- All-time leaderboard -->
     <section class="card">
-      <h2>🏆 All-Time Leaderboard</h2>
-      <div id="overall-leaderboard" class="leaderboard-wrap">
-        <p class="empty-msg">No data yet.</p>
+      <h2>🏆 All-Time Hall of Fame</h2>
+      <div id="overall-leaderboard" class="leaderboard-wrap"></div>
+    </section>
+
+    <!-- Stats & Highlights -->
+    <section class="card">
+      <div class="card-header">
+        <h2>📌 Stats & Highlights</h2>
+        <div class="select-row">
+          <label for="focus-player">Focus player</label>
+          <select id="focus-player"></select>
+          <label for="form-length">Form</label>
+          <select id="form-length">
+            <option value="5">Last 5</option>
+            <option value="10">Last 10</option>
+          </select>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-label">Win %</span>
+          <span class="stat-value" id="stat-win-pct">—</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Total matches</span>
+          <span class="stat-value" id="stat-matches">—</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Current streak</span>
+          <span class="stat-value" id="stat-current-streak">—</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Best streak</span>
+          <span class="stat-value" id="stat-best-streak">—</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Form</span>
+          <span class="stat-value" id="stat-form">—</span>
+        </div>
+      </div>
+
+      <div class="highlight-grid">
+        <div class="highlight-card">
+          <h4>Most active player</h4>
+          <p id="highlight-active">—</p>
+        </div>
+        <div class="highlight-card">
+          <h4>Most improved this month</h4>
+          <p id="highlight-improved">—</p>
+        </div>
+        <div class="highlight-card">
+          <h4>Player of the week</h4>
+          <p id="highlight-week">—</p>
+        </div>
+      </div>
+
+      <div class="head-to-head">
+        <h4>Head-to-head</h4>
+        <div class="select-row">
+          <label for="head-a">Player A</label>
+          <select id="head-a"></select>
+          <label for="head-b">Player B</label>
+          <select id="head-b"></select>
+        </div>
+        <p id="head-to-head-result">—</p>
+      </div>
+
+      <div class="badge-row">
+        <h4>Badges</h4>
+        <div id="badge-list" class="badge-list"></div>
       </div>
     </section>
 
-    <!-- History (past dates) -->
+    <!-- Recent matches -->
     <section class="card">
-      <h2>📖 Score History</h2>
-      <div id="history-panel" class="history-wrap">
-        <p class="empty-msg">No history yet.</p>
-      </div>
+      <h2>🗂️ Recent Matches</h2>
+      <div id="recent-matches" class="history-wrap"></div>
     </section>
   </main>
 
@@ -67,6 +165,7 @@
     <p>Shuttle-Ops &copy; <span id="year"></span></p>
   </footer>
 
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
   <script src="app.js"></script>
 </body>
 </html>
