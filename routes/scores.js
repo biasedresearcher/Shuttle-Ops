@@ -369,7 +369,7 @@ function computeBadges(playerStats, statsByPlayer) {
   return badges;
 }
 
-// POST /api/matches
+// POST /api/matches - Create a new match
 router.post('/matches', (req, res) => {
   const matchType = req.body.matchType === 'doubles' ? 'doubles' : 'singles';
   const teamAInput = Array.isArray(req.body.teamA) ? req.body.teamA : [];
@@ -411,7 +411,7 @@ router.post('/matches', (req, res) => {
   });
 });
 
-// PATCH /api/matches/:id
+// PATCH /api/matches/:id - Update an existing match
 router.patch('/matches/:id', (req, res) => {
   const matchType = req.body.matchType === 'doubles' ? 'doubles' : 'singles';
   const teamAInput = Array.isArray(req.body.teamA) ? req.body.teamA : [];
@@ -444,7 +444,7 @@ router.patch('/matches/:id', (req, res) => {
   res.json({ match: mapMatch(updated) });
 });
 
-// DELETE /api/matches/:id
+// DELETE /api/matches/:id - Delete a match by ID
 router.delete('/matches/:id', (req, res) => {
   const deleted = db.deleteMatch(Number(req.params.id));
   if (!deleted) {
@@ -453,7 +453,7 @@ router.delete('/matches/:id', (req, res) => {
   res.json({ match: mapMatch(deleted) });
 });
 
-// POST /api/matches/undo
+// POST /api/matches/undo - Delete the last recorded match
 router.post('/matches/undo', (_req, res) => {
   const deleted = db.deleteLastMatch();
   if (!deleted) {
@@ -462,14 +462,14 @@ router.post('/matches/undo', (_req, res) => {
   res.json({ match: mapMatch(deleted) });
 });
 
-// GET /api/matches/recent
+// GET /api/matches/recent - Get recent matches with optional limit
 router.get('/matches/recent', (req, res) => {
   const limit = Number(req.query.limit) || 10;
   const matches = db.getRecentMatches(limit).map(mapMatch);
   res.json({ matches });
 });
 
-// GET /api/leaderboard?range=day|week|month|all
+// GET /api/leaderboard?range=day|week|month|all - Get leaderboard for specified time range
 router.get('/leaderboard', (req, res) => {
   const range = req.query.range || 'day';
   const date = req.query.date || todayIso();
@@ -490,12 +490,12 @@ router.get('/leaderboard', (req, res) => {
   res.json({ range: bounds.label, date, leaderboard: enriched });
 });
 
-// GET /api/players
+// GET /api/players - Get list of all players
 router.get('/players', (_req, res) => {
   res.json({ players: db.listPlayers() });
 });
 
-// GET /api/stats?player=...&opponent=...&form=5
+// GET /api/stats?player=...&opponent=...&form=5 - Get player statistics and head-to-head data
 router.get('/stats', (req, res) => {
   const player = req.query.player ? normalizeName(req.query.player) : null;
   const opponent = req.query.opponent ? normalizeName(req.query.opponent) : null;

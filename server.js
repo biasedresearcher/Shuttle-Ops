@@ -20,8 +20,17 @@ const apiLimiter = rateLimit({
 
 app.use('/api', apiLimiter, require('./routes/scores'));
 
+// Light rate limit for static HTML responses
+const pageLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: 'Too many requests, please try again later.'
+});
+
 // Serve index.html for any non-API route (SPA-style)
-app.get('*', (_req, res) => {
+app.get('*', pageLimiter, (_req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
