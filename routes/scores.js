@@ -5,6 +5,11 @@ const router = express.Router();
 const db = require('../db/database');
 
 const NAME_LIMIT = 50;
+const DAYS_ACTIVE_WINDOW = 30;
+const DAYS_WEEK = 7;
+const MIN_MATCHES_FOR_IMPROVED = 3;
+const MIN_MATCHES_FOR_PLAYER_OF_WEEK = 3;
+const MIN_BADGE_STREAK = 3;
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
@@ -58,6 +63,39 @@ function validatePlayers(names) {
     return { error: 'Player names must be unique within a match.' };
   }
   return { cleaned };
+}
+
+function validateMatchPayload(body, { allowDate = false } = {}) {
+  const matchType = body.matchType === 'doubles' ? 'doubles' : 'singles';
+  const teamAInput = Array.isArray(body.teamA) ? body.teamA : [];
+  const teamBInput = Array.isArray(body.teamB) ? body.teamB : [];
+  const { cleaned: teamA, error: teamAError } = validatePlayers(teamAInput);
+  const { cleaned: teamB, error: teamBError } = validatePlayers(teamBInput);
+  if (teamAError || teamBError) {
+    return { error: teamAError || teamBError };
+  }
+  const combined = [...teamA, ...teamB];
+  const combinedSet = new Set(combined.map(name => name.toLowerCase()));
+  if (combinedSet.size !== combined.length) {
+    return { error: 'Players cannot appear on both teams.' };
+  }
+  if (!teamA.length || !teamB.length) {
+    return { error: 'Both teams must have at least one player.' };
+  }
+  if (matchType === 'singles' && (teamA.length !== 1 || teamB.length !== 1)) {
+    return { error: 'Singles matches require one player per team.' };
+  }
+  if (matchType === 'doubles' && (teamA.length !== 2 || teamB.length !== 2)) {
+    return { error: 'Doubles matches require two players per team.' };
+  }
+
+  return {
+    matchType,
+    teamA,
+    teamB,
+    winnerTeam: body.winnerTeam === 'B' ? 'B' : 'A',
+    date: allowDate && body.matchDate ? body.matchDate : todayIso()
+  };
 }
 
 function mapMatch(row) {
@@ -123,8 +161,8 @@ function extractTeams(match) {
 function computeStats(matches, player, opponent, formCount) {
   const statsByPlayer = new Map();
   const today = new Date();
-  const cutoff30 = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - 30));
-  const cutoff7 = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - 7));
+  const cutoff30 = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - DAYS_ACTIVE_WINDOW));
+  const cutoff7 = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - DAYS_WEEK));
 
   matches.forEach(match => {
     const teams = extractTeams(match);
@@ -291,7 +329,7 @@ function pickMostActive(statsByPlayer) {
 function pickMostImproved(statsByPlayer) {
   let best = null;
   statsByPlayer.forEach(entry => {
-    if (entry.prevMonthMatches < 3 || entry.monthMatches < 3) return;
+    if (entry.prevMonthMatches < MIN_MATCHES_FOR_IMPROVED || entry.monthMatches < MIN_MATCHES_FOR_IMPROVED) return;
     const prevPct = entry.prevMonthMatches ? entry.prevMonthWins / entry.prevMonthMatches : 0;
     const currentPct = entry.monthMatches ? entry.monthWins / entry.monthMatches : 0;
     const delta = currentPct - prevPct;
@@ -308,7 +346,7 @@ function pickMostImproved(statsByPlayer) {
 function pickPlayerOfWeek(statsByPlayer) {
   let best = null;
   statsByPlayer.forEach(entry => {
-    if (entry.matchesLast7 < 3) return;
+    if (entry.matchesLast7 < MIN_MATCHES_FOR_PLAYER_OF_WEEK) return;
     const pct = entry.matchesLast7 ? entry.winsLast7 / entry.matchesLast7 : 0;
     if (!best || pct > best.pct || (pct === best.pct && entry.winsLast7 > best.wins)) {
       best = {
@@ -337,7 +375,7 @@ function computeBadges(playerStats, statsByPlayer) {
     }
     maxWinDayStreak = Math.max(maxWinDayStreak, currentStreak);
   }
-  if (maxWinDayStreak >= 3) {
+  if (maxWinDayStreak >= MIN_BADGE_STREAK) {
     badges.push({ id: 'streak-3', label: '3-day streak', detail: `${maxWinDayStreak} day win streak` });
   }
 
@@ -371,30 +409,11 @@ function computeBadges(playerStats, statsByPlayer) {
 
 // POST /api/matches - Create a new match
 router.post('/matches', (req, res) => {
-  const matchType = req.body.matchType === 'doubles' ? 'doubles' : 'singles';
-  const teamAInput = Array.isArray(req.body.teamA) ? req.body.teamA : [];
-  const teamBInput = Array.isArray(req.body.teamB) ? req.body.teamB : [];
-  const { cleaned: teamA, error: teamAError } = validatePlayers(teamAInput);
-  const { cleaned: teamB, error: teamBError } = validatePlayers(teamBInput);
-  if (teamAError || teamBError) {
-    return res.status(400).json({ error: teamAError || teamBError });
+  const validation = validateMatchPayload(req.body);
+  if (validation.error) {
+    return res.status(400).json({ error: validation.error });
   }
-  const combined = [...teamA, ...teamB];
-  const combinedSet = new Set(combined.map(name => name.toLowerCase()));
-  if (combinedSet.size !== combined.length) {
-    return res.status(400).json({ error: 'Players cannot appear on both teams.' });
-  }
-  if (!teamA.length || !teamB.length) {
-    return res.status(400).json({ error: 'Both teams must have at least one player.' });
-  }
-  if (matchType === 'singles' && (teamA.length !== 1 || teamB.length !== 1)) {
-    return res.status(400).json({ error: 'Singles matches require one player per team.' });
-  }
-  if (matchType === 'doubles' && (teamA.length !== 2 || teamB.length !== 2)) {
-    return res.status(400).json({ error: 'Doubles matches require two players per team.' });
-  }
-  const winnerTeam = req.body.winnerTeam === 'B' ? 'B' : 'A';
-  const date = todayIso();
+  const { matchType, teamA, teamB, winnerTeam, date } = validation;
   const id = db.recordMatch({ teamA, teamB, winnerTeam, matchType, date });
   const match = mapMatch(db.getMatchById(id));
   const dailyBounds = getRangeBounds('day', date);
@@ -413,30 +432,11 @@ router.post('/matches', (req, res) => {
 
 // PATCH /api/matches/:id - Update an existing match
 router.patch('/matches/:id', (req, res) => {
-  const matchType = req.body.matchType === 'doubles' ? 'doubles' : 'singles';
-  const teamAInput = Array.isArray(req.body.teamA) ? req.body.teamA : [];
-  const teamBInput = Array.isArray(req.body.teamB) ? req.body.teamB : [];
-  const { cleaned: teamA, error: teamAError } = validatePlayers(teamAInput);
-  const { cleaned: teamB, error: teamBError } = validatePlayers(teamBInput);
-  if (teamAError || teamBError) {
-    return res.status(400).json({ error: teamAError || teamBError });
+  const validation = validateMatchPayload(req.body, { allowDate: true });
+  if (validation.error) {
+    return res.status(400).json({ error: validation.error });
   }
-  const combined = [...teamA, ...teamB];
-  const combinedSet = new Set(combined.map(name => name.toLowerCase()));
-  if (combinedSet.size !== combined.length) {
-    return res.status(400).json({ error: 'Players cannot appear on both teams.' });
-  }
-  if (!teamA.length || !teamB.length) {
-    return res.status(400).json({ error: 'Both teams must have at least one player.' });
-  }
-  if (matchType === 'singles' && (teamA.length !== 1 || teamB.length !== 1)) {
-    return res.status(400).json({ error: 'Singles matches require one player per team.' });
-  }
-  if (matchType === 'doubles' && (teamA.length !== 2 || teamB.length !== 2)) {
-    return res.status(400).json({ error: 'Doubles matches require two players per team.' });
-  }
-  const winnerTeam = req.body.winnerTeam === 'B' ? 'B' : 'A';
-  const date = req.body.matchDate ? req.body.matchDate : todayIso();
+  const { matchType, teamA, teamB, winnerTeam, date } = validation;
   const updated = db.updateMatch(Number(req.params.id), { teamA, teamB, winnerTeam, matchType, date });
   if (!updated) {
     return res.status(404).json({ error: 'Match not found.' });

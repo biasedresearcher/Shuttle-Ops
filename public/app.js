@@ -38,6 +38,8 @@ const badgeList = document.getElementById('badge-list');
 const recentMatches = document.getElementById('recent-matches');
 const toastContainer = document.getElementById('toast-container');
 
+const TOAST_DURATION_MS = 5000;
+
 let editingMatchId = null;
 let recentMatchCache = [];
 
@@ -75,7 +77,7 @@ function showToast(achievement) {
   toastContainer.appendChild(toast);
   setTimeout(() => {
     toast.remove();
-  }, 5000);
+  }, TOAST_DURATION_MS);
 }
 
 async function fetchJson(url, options) {
